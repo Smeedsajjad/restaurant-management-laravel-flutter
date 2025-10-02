@@ -32,6 +32,12 @@ class CategorySeeder extends Seeder
                 'active' => true,
                 'position' => 3,
             ],
+            [
+                'name' => 'Desserts',
+                'image' => 'categories/desserts.webp',
+                'active' => true,
+                'position' => 4,
+            ],
         ];
 
         foreach ($categories as $category) {
