@@ -5,7 +5,7 @@ abstract class AppColors {
 
   // Primary palette
   static const Color primary = Color(0xFFee8e1e);
-  static const Color primaryVariant = Color(0xFFe9a24d);
+  static const Color primaryVariant = Color.fromARGB(255, 241, 194, 135);
   static const Color primaryLight = Color(0xFFfcf4e9);
   static const Color secondary = Color(0xFFf13f95);
   static const Color secondaryVariant = Color(0xFFfdecf4);
