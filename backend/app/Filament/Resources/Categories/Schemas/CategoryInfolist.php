@@ -13,14 +13,7 @@ class CategoryInfolist
     {
         return $schema
             ->components([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name'),
-                    ]),
-                Section::make()
-                    ->schema([
-                        ImageEntry::make('image')->imageHeight(300),
-                    ])
-            ])->columns(1);
+
+            ]);
     }
 }

@@ -1,0 +1,28 @@
+<?php
+
+return [
+    '🍕' => '🍕 Pizza',
+    '🍔' => '🍔 Burger',
+    '🍟' => '🍟 Fries',
+    '🌭' => '🌭 Hot Dog',
+    '🍿' => '🍿 Popcorn',
+    '🥗' => '🥗 Salad',
+    '🍣' => '🍣 Sushi',
+    '🍜' => '🍜 Ramen',
+    '🥪' => '🥪 Sandwich',
+    '🍩' => '🍩 Donut',
+    '🍦' => '🍦 Ice Cream',
+    '🍪' => '🍪 Cookie',
+    '🥤' => '🥤 Soft Drink',
+    '☕' => '☕ Coffee',
+    '🍹' => '🍹 Cocktail',
+    '🍇' => '🍇 Grapes',
+    '🍎' => '🍎 Apple',
+    '🍌' => '🍌 Banana',
+    '🍍' => '🍍 Pineapple',
+    '🥩' => '🥩 Steak',
+    '🍗' => '🍗 Chicken',
+    '🍤' => '🍤 Shrimp',
+    '🥟' => '🥟 Dumplings',
+    '🍰' => '🍰 Cake',
+];

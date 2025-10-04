@@ -26,7 +26,12 @@ class MenuItemForm
 
                         Select::make('category_id')
                             ->label('Category')
-                            ->relationship('category', 'name')
+                            ->relationship(
+                                name: 'category',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn($query) => $query->where('is_active', true)
+                            )
+                            ->native(false)
                             ->required(),
 
                         TextInput::make('base_price')

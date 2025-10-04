@@ -16,27 +16,33 @@ class CategorySeeder extends Seeder
         $categories = [
             [
                 'name' => 'Pizza',
-                'image' => 'categories/pizza.webp',
-                'active' => true,
+                'emoji' => '🍕',
+                'is_active' => true,
                 'position' => 1,
             ],
             [
                 'name' => 'Burgers',
-                'image' => 'categories/burger.webp',
-                'active' => true,
+                'emoji' => '🍔',
+                'is_active' => true,
                 'position' => 2,
             ],
             [
                 'name' => 'Drinks',
-                'image' => 'categories/drinks.webp',
-                'active' => true,
+                'emoji' => '🥤',
+                'is_active' => true,
                 'position' => 3,
             ],
             [
-                'name' => 'Desserts',
-                'image' => 'categories/desserts.webp',
-                'active' => true,
+                'name' => 'Ice Cream',
+                'emoji' => '🍦',
+                'is_active' => true,
                 'position' => 4,
+            ],
+            [
+                'name' => 'Coffee',
+                'emoji' => '☕',
+                'is_active' => true,
+                'position' => 5,
             ],
         ];
 

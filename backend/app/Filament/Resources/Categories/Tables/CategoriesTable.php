@@ -24,9 +24,9 @@ class CategoriesTable
         return $table
             ->reorderable("position")
             ->columns([
+                TextColumn::make("emoji")->label("Icon") ->extraAttributes(['style' => 'font-size: 2rem;']),
                 TextColumn::make("name")->sortable()->searchable(),
                 ToggleColumn::make("is_active")->label('Is Active'),
-                ImageColumn::make("image")->imageHeight(70)->circular()
             ])
             ->filters([
                 SelectFilter::make('is_active')
@@ -77,8 +77,7 @@ class CategoriesTable
                     }),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()->modalWidth('lg')->slideOver(),
                 DeleteAction::make()
             ])
             ->toolbarActions([

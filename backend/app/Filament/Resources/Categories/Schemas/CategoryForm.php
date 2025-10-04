@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Categories\Schemas;
 
-use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
@@ -18,30 +18,23 @@ class CategoryForm
                     ->schema([
                         TextInput::make('name')
                             ->label('Category Name')
-                            ->required()
                             ->maxLength(255)
+                            ->required()
                             ->unique(),
-
-                        TextInput::make('position')
-                            ->numeric()
-                            ->default(0),
-
+                        Select::make('emoji')
+                            ->label('Category Icon')
+                            ->options(config('emojis'))
+                            ->searchable()
+                            ->native(false)
+                            ->required()
+                            ->unique(),
                         ToggleButtons::make('is_active')
                             ->label('Status')
                             ->boolean()
                             ->grouped()
                             ->default(true),
-                    ])
-                    ->columns(2),
+                    ])->columnSpanFull(),
 
-                Section::make('Media')
-                    ->schema([
-                        FileUpload::make('image')
-                            ->label('Category Image')
-                            ->image()
-                            ->directory('categories')
-                            ->required(),
-                    ]),
             ]);
 
     }
