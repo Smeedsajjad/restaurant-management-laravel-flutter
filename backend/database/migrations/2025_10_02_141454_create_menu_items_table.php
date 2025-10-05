@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->string('name')->unique();
             $table->longText('description');
-            $table->decimal('base_price', 8, 2)->default(0.00);
+            $table->decimal(column: 'base_price', 8, 2)->default(0.00);
             $table->json('images');
             $table->boolean('is_available')->default(true);
             $table->timestamps();

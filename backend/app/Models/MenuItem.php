@@ -10,6 +10,8 @@ class MenuItem extends Model
 
     protected $casts = [
         'images' => 'array',
+        'is_available' => 'boolean',
+        'base_price' => 'decimal:2',
     ];
     public function category()
     {

@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Resources\MenuItemsResource;
+use App\Http\Controllers\Controller;
+use App\Models\MenuItem;
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
+
+class MenuItemsController extends Controller
+{
+    use ApiResponse;
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+
+        return $this->success(MenuItemsResource::collection(MenuItem::all())->response()->getData(), 'Menu items fetched');
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(MenuItem $menu_item)
+    {
+        $menu_item->load('category');
+        return $this->success(new MenuItemsResource($menu_item), 'Menu item fetched');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
+}
