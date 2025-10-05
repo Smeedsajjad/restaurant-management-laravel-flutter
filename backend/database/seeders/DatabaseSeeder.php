@@ -20,6 +20,6 @@ class DatabaseSeeder extends Seeder
             'is_admin' => true,
             'password' => 'admin',
         ]);
-        CategorySeeder::class;
+        MenuSeeder::class;
     }
 }
