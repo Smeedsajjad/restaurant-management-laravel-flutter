@@ -190,11 +190,11 @@ class HomeView extends StatelessWidget {
 
   Widget _buildFoodCategories() {
     final categories = [
-      {'icon': '🍔', 'color': const Color(0xFFFFE8CC)},
-      {'icon': '🥕', 'color': const Color(0xFFFFE0CC)},
-      {'icon': '🍕', 'color': const Color(0xFFFFE8CC)},
-      {'icon': '🥑', 'color': const Color(0xFFE8F5E9)},
-      {'icon': '🥐', 'color': const Color(0xFFFFE8CC)},
+      {'icon': '🍔'},
+      {'icon': '🥕'},
+      {'icon': '🍕'},
+      {'icon': '🥑'},
+      {'icon': '🥐'},
     ];
 
     return SizedBox(
@@ -208,7 +208,7 @@ class HomeView extends StatelessWidget {
             width: 60,
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: categories[index]['color'] as Color,
+              color: Color(0xFFFFE8CC),
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.primaryVariant),
             ),
