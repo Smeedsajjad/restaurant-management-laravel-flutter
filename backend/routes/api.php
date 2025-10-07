@@ -4,19 +4,43 @@ use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\MenuItemsController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\UserAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register', [UserAuthController::class, 'register']);
-Route::post('/login', [UserAuthController::class, 'login']);
-Route::post('/logout', [UserAuthController::class, 'logout'])
-    ->middleware('auth:sanctum');
+/* ------------------------------------------------------------------
+|  Public routes  (no token)
+|------------------------------------------------------------------ */
+Route::post('register', [UserAuthController::class, 'register']);
+Route::post('login', [UserAuthController::class, 'login']);
 
+/* ---- reviews (read only) ---- */
+Route::prefix('v1')->group(function () {
+    Route::get('reviews', [ReviewController::class, 'index']);
+    Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('menu-items', MenuItemsController::class);
 
-Route::prefix('v1')->name('api.v1.')->group(function () {
-    Route::apiResource('/categories', CategoryController::class);
-    Route::apiResource('/menu-items', MenuItemsController::class);
-    Route::apiResource('/address', AddressController::class);
-    Route::apiResource('/orders', OrderController::class);
-})->middleware('auth:sanctum');
+});
+
+/* ------------------------------------------------------------------
+|  Protected routes  (token required)
+|------------------------------------------------------------------ */
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::post('logout', [UserAuthController::class, 'logout']);
+
+    Route::prefix('v1')->as('api.v1.')->group(function () {
+        Route::apiResource('addresses', AddressController::class);
+        Route::apiResource('orders', OrderController::class);
+        /* reviews (write) */
+        Route::post('reviews', [ReviewController::class, 'store']);
+    });
+});
+
+Route::middleware('auth:sanctum')->get('/v1/test-auth', function (Request $request) {
+    return response()->json([
+        'user_id' => $request->user()->id,
+        'email' => $request->user()->email,
+    ]);
+});

@@ -23,5 +23,6 @@ class DatabaseSeeder extends Seeder
         MenuSeeder::class;
         AddressSeeder::class;
         OrderSeeder::class;
+        ReviewSeeder::class;
     }
 }
