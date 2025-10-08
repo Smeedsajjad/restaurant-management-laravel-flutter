@@ -11,6 +11,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
@@ -20,14 +21,21 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
+
         $orders = Order::with(['items.menuItem', 'address'])
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $user->id)
             ->latest()
             ->get();
 
-        return $this->success(OrderResource::collection($orders), 'Orders fetched successfully');
+        $addresses = $user->addresses; // fetch all addresses
 
+        return $this->success([
+            'orders' => OrderResource::collection($orders),
+            'addresses' => $addresses,
+        ], 'Orders and addresses fetched successfully');
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -35,12 +43,16 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'address_id' => 'required|exists:addresses,id',
+            'address_id' => [
+                'required',
+                Rule::exists('addresses', 'id')->where('user_id', $request->user()->id),
+            ],
             'items' => 'required|array|min:1',
             'items.*.menu_item_id' => 'required|exists:menu_items,id',
             'items.*.quantity' => 'required|integer|min:1',
             'note' => 'nullable|string',
         ]);
+
 
         $userId = $request->user()->id;
 

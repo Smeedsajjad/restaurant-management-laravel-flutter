@@ -16,8 +16,9 @@ class OrderResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "user_id" => $this->address_id,
+            "address_id" => $this->address_id,
             "order_number" => $this->order_number,
+            "items" => OrderItemResource::collection($this->whenLoaded('items')),
             "subtotal" => $this->subtotal,
             "tax" => $this->tax,
             "total" => $this->total,
