@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\MenuItemsController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\UserAuthController;
+use App\Http\Resources\CartResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,14 +34,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('v1')->as('api.v1.')->group(function () {
         Route::apiResource('addresses', AddressController::class);
         Route::apiResource('orders', OrderController::class);
+        Route::apiResource('cart', \App\Http\Controllers\Api\CartController::class);
+        Route::delete('cart-clear', [\App\Http\Controllers\Api\CartController::class, 'clear']);
         /* reviews (write) */
         Route::post('reviews', [ReviewController::class, 'store']);
     });
-});
-
-Route::middleware('auth:sanctum')->get('/v1/test-auth', function (Request $request) {
-    return response()->json([
-        'user_id' => $request->user()->id,
-        'email' => $request->user()->email,
-    ]);
 });
