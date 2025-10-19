@@ -25,8 +25,12 @@ class UserAuthController extends Controller
             'email' => $registerUserData['email'],
             'password' => Hash::make($registerUserData['password']),
         ]);
+        $token = $user->createToken($user->name . '-AuthToken')->plainTextToken;
         return $this->success(
-            new UserAuthResource($user),
+            [
+                'user' => new UserAuthResource($user),
+                'token' => $token,
+            ],
             'Registered successfully'
         );
     }

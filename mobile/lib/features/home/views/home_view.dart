@@ -1,8 +1,107 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/features/auth/view/login_screen.dart';
 import 'package:mobile/utils/constants/app_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  String? userName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('user_name') ?? 'Guest';
+    });
+  }
+
+  // Future<void> _logout(BuildContext context) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.remove('token');
+  //   debugPrint('🧹 Token removed. Logging out...');
+  //   if (context.mounted) {
+  //     context.go('/login');
+  //   }
+  // }
+
+  // 1. First, show confirmation AlertDialog
+  Future<void> _confirmLogout(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text("Logout"),
+          content: const Text("Are you sure you want to logout?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                // IMPORTANT: use the outer 'context' (the state context),
+                // not the dialogContext which will be deactivated after pop.
+                _performLogout(context);
+              },
+              child: const Text("Logout", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _performLogout(BuildContext context) async {
+    try {
+      // optional API logout if needed
+      // await _api.logout();
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token');
+      debugPrint('🧹 Token removed. Logging out...');
+
+      // ensure widget still mounted before showing UI / navigating
+      if (!mounted) return;
+      await _showLogoutSuccessModal(context);
+    } catch (e) {
+      debugPrint('❌ Logout error: $e');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token');
+      if (!mounted) return;
+      await _showLogoutSuccessModal(context);
+    }
+  }
+
+  Future<void> _showLogoutSuccessModal(BuildContext context) async {
+    // ensure state still active before accessing ScaffoldMessenger
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Logout successful — redirecting to login...'),
+        duration: Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+    context.go('/login');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,17 +142,17 @@ class HomeView extends StatelessWidget {
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
-                'Hi Rafiq',
-                style: TextStyle(
+                'Hi ${userName ?? 'Guest'} 👋',
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
-              SizedBox(height: 4),
-              Text(
+              const SizedBox(height: 4),
+              const Text(
                 'Welcome to Taasty!',
                 style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
@@ -81,11 +180,40 @@ class HomeView extends StatelessWidget {
                   color: Colors.black87,
                 ),
               ),
-              const SizedBox(width: 12),
-              const CircleAvatar(
-                radius: 20,
-                backgroundColor: AppColors.primary,
-                child: Icon(Icons.person, color: Colors.white),
+
+              // ElevatedButton(
+              //   onPressed: () => _logout(context),
+              //   child: const Text("Logout"),
+              // ),
+
+              // const CircleAvatar(
+              //   radius: 20,
+              //   backgroundColor: AppColors.primary,
+              //   child: Icon(Icons.person, color: Colors.white),
+              // ),
+              PopupMenuButton<int>(
+                tooltip: '',
+                offset: const Offset(0, 40), // move dropdown below avatar
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                itemBuilder: (context) => [
+                  PopupMenuItem(value: 1, child: const Text('Profile')),
+                  PopupMenuItem(value: 2, child: const Text('Logout')),
+                ],
+                onSelected: (value) {
+                  if (value == 1) {
+                    // TODO: navigate to profile
+                    debugPrint('Profile tapped');
+                  } else if (value == 2) {
+                    _confirmLogout(context);
+                  }
+                },
+                child: const CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppColors.primary,
+                  child: Icon(Icons.person, color: Colors.white),
+                ),
               ),
             ],
           ),
