@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/features/auth/view/login_screen.dart';
 import 'package:mobile/features/auth/view/register_screen.dart';
@@ -11,7 +12,7 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('token');
   final isLoggedIn = token != null && token.isNotEmpty;
-  runApp(TaastyApp(isLoggedIn: isLoggedIn));
+  runApp(ProviderScope(child: TaastyApp(isLoggedIn: isLoggedIn)));
 }
 
 class TaastyApp extends StatelessWidget {
