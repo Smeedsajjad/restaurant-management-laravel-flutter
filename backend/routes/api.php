@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\Route;
 |------------------------------------------------------------------ */
 Route::post('register', [UserAuthController::class, 'register']);
 Route::post('login', [UserAuthController::class, 'login']);
-
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
 /* ---- reviews (read only) ---- */
 Route::prefix('v1')->group(function () {
     Route::get('reviews', [ReviewController::class, 'index']);

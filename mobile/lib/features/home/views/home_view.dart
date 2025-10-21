@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mobile/features/auth/view/login_screen.dart';
+import 'package:mobile/utils/app_env.dart';
 import 'package:mobile/utils/constants/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -22,21 +24,39 @@ class _HomeViewState extends State<HomeView> {
 
   Future<void> _loadUser() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString('user_name') ?? 'Guest';
-    });
+    final token = prefs.getString('token');
+    if (token == null) {
+      setState(() {
+        userName = 'Guest';
+      });
+      return;
+    }
+
+    try {
+      final res = await http.get(
+        Uri.parse('http://backend.test/api/user'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        setState(() {
+          userName = data['name'] ?? 'Guest';
+        });
+      } else {
+        setState(() {
+          userName = 'Guest';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        userName = 'Guest';
+      });
+    }
   }
 
-  // Future<void> _logout(BuildContext context) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   await prefs.remove('token');
-  //   debugPrint('🧹 Token removed. Logging out...');
-  //   if (context.mounted) {
-  //     context.go('/login');
-  //   }
-  // }
-
-  // 1. First, show confirmation AlertDialog
   Future<void> _confirmLogout(BuildContext context) async {
     showDialog(
       context: context,
@@ -52,8 +72,6 @@ class _HomeViewState extends State<HomeView> {
             TextButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                // IMPORTANT: use the outer 'context' (the state context),
-                // not the dialogContext which will be deactivated after pop.
                 _performLogout(context);
               },
               child: const Text("Logout", style: TextStyle(color: Colors.red)),
@@ -66,14 +84,10 @@ class _HomeViewState extends State<HomeView> {
 
   Future<void> _performLogout(BuildContext context) async {
     try {
-      // optional API logout if needed
-      // await _api.logout();
-
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('token');
       debugPrint('🧹 Token removed. Logging out...');
 
-      // ensure widget still mounted before showing UI / navigating
       if (!mounted) return;
       await _showLogoutSuccessModal(context);
     } catch (e) {
@@ -86,7 +100,6 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Future<void> _showLogoutSuccessModal(BuildContext context) async {
-    // ensure state still active before accessing ScaffoldMessenger
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -144,7 +157,7 @@ class _HomeViewState extends State<HomeView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hi ${userName ?? 'Guest'} 👋',
+                'Hi $userName 👋',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
