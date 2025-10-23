@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mobile/utils/app_env.dart';
+import 'package:mobile/features/category/views/category_section.dart';
 import 'package:mobile/utils/constants/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -133,7 +133,8 @@ class _HomeViewState extends State<HomeView> {
                     const SizedBox(height: 20),
                     _buildPromoCard(),
                     const SizedBox(height: 24),
-                    _buildFoodCategories(),
+                    // _buildFoodCategories(),
+                    const CategorySection(),
                     const SizedBox(height: 24),
                     _buildRecommendedSection(),
                   ],
@@ -194,19 +195,9 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
 
-              // ElevatedButton(
-              //   onPressed: () => _logout(context),
-              //   child: const Text("Logout"),
-              // ),
-
-              // const CircleAvatar(
-              //   radius: 20,
-              //   backgroundColor: AppColors.primary,
-              //   child: Icon(Icons.person, color: Colors.white),
-              // ),
               PopupMenuButton<int>(
                 tooltip: '',
-                offset: const Offset(0, 40), // move dropdown below avatar
+                offset: const Offset(0, 40),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -325,42 +316,6 @@ class _HomeViewState extends State<HomeView> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildFoodCategories() {
-    final categories = [
-      {'icon': '🍔'},
-      {'icon': '🥕'},
-      {'icon': '🍕'},
-      {'icon': '🥑'},
-      {'icon': '🥐'},
-    ];
-
-    return SizedBox(
-      height: 70,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          return Container(
-            width: 60,
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: Color(0xFFFFE8CC),
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.primaryVariant),
-            ),
-            child: Center(
-              child: Text(
-                categories[index]['icon'] as String,
-                style: const TextStyle(fontSize: 32),
-              ),
-            ),
-          );
-        },
       ),
     );
   }

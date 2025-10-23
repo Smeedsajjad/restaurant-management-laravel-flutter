@@ -19,15 +19,13 @@ class CategoryForm
                         TextInput::make('name')
                             ->label('Category Name')
                             ->maxLength(255)
-                            ->required()
-                            ->unique(),
+                            ->required(),
                         Select::make('emoji')
                             ->label('Category Icon')
                             ->options(config('emojis'))
                             ->searchable()
                             ->native(false)
-                            ->required()
-                            ->unique(),
+                            ->required(),
                         ToggleButtons::make('is_active')
                             ->label('Status')
                             ->boolean()
