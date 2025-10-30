@@ -55,6 +55,8 @@ class MenuItemForm
                             ->label('Images')
                             ->image()->multiple()
                             ->reorderable()
+                            ->disk('public')
+                            ->visibility('public')
                             ->columnSpan('full'),
                     ])->columns(2)->columnSpan(2),
 

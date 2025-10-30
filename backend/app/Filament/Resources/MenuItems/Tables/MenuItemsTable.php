@@ -15,6 +15,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 
 class MenuItemsTable
 {
@@ -23,8 +24,13 @@ class MenuItemsTable
         return $table
             ->columns([
                 TextColumn::make("name")->sortable()->searchable(),
-                TextColumn::make("base_price")->sortable()->searchable(),
-                ImageColumn::make("images")->imageHeight(70)
+                ImageColumn::make('images')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->imageHeight(70)
+                    ->url(fn($record) => is_array($record->images) && count($record->images)
+                        ? $record->images[0]
+                        : null)
                     ->circular()
                     ->stacked()
                     ->limit(2)
