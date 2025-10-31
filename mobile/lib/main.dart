@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mobile/features/product/views/product_list_view.dart';
 import 'package:mobile/utils/constants/app_colors.dart';
+import 'package:mobile/utils/core/widgets/app_shell.dart';
 
 void main() {
   runApp(ProviderScope(child: const TaastyApp()));
@@ -20,7 +20,7 @@ class TaastyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         useMaterial3: true,
       ),
-      home: const ProductListView(),
+      home: const AppShell(),
     );
   }
 }

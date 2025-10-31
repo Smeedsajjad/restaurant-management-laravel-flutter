@@ -15,7 +15,6 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   String? userName;
-
   @override
   void initState() {
     super.initState();
@@ -133,7 +132,6 @@ class _HomeViewState extends State<HomeView> {
                     const SizedBox(height: 20),
                     _buildPromoCard(),
                     const SizedBox(height: 24),
-                    // _buildFoodCategories(),
                     const CategorySection(),
                     const SizedBox(height: 24),
                     _buildRecommendedSection(),
@@ -141,7 +139,6 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
             ),
-            _buildBottomNavBar(),
           ],
         ),
       ),
@@ -182,7 +179,6 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 child: const Icon(Icons.search, color: Colors.black87),
               ),
-              const SizedBox(width: 12),
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -194,6 +190,7 @@ class _HomeViewState extends State<HomeView> {
                   color: Colors.black87,
                 ),
               ),
+              const SizedBox(width: 12),
 
               PopupMenuButton<int>(
                 tooltip: '',
@@ -207,8 +204,7 @@ class _HomeViewState extends State<HomeView> {
                 ],
                 onSelected: (value) {
                   if (value == 1) {
-                    // TODO: navigate to profile
-                    debugPrint('Profile tapped');
+                    context.go('/profile');
                   } else if (value == 2) {
                     _confirmLogout(context);
                   }
@@ -387,7 +383,7 @@ class _HomeViewState extends State<HomeView> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black,
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -474,63 +470,6 @@ class _HomeViewState extends State<HomeView> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomNavBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(Icons.home, 'Home', true),
-              _buildNavItem(Icons.shopping_bag_outlined, 'Cart', false),
-              _buildNavItem(Icons.chat_bubble_outline, 'Chat', false),
-              _buildNavItem(Icons.person_outline, 'Profile', false),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: isActive ? Colors.orange : Colors.grey, size: 28),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: isActive ? Colors.orange : Colors.grey,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-          ),
-        ),
-        if (isActive)
-          Container(
-            margin: const EdgeInsets.only(top: 4),
-            width: 4,
-            height: 4,
-            decoration: const BoxDecoration(
-              color: Colors.black,
-              shape: BoxShape.circle,
-            ),
-          ),
-      ],
     );
   }
 }
