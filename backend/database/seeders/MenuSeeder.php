@@ -50,20 +50,20 @@ class MenuSeeder extends Seeder
     {
         $items = [
             /* ---------- PIZZA ---------- */
-            ['category_id' => $cat['Pizza'], 'name' => 'Margherita Pizza', 'base_price' => 8.00, 'description' => 'Classic cheese & tomato pizza.', 'images' => json_encode(['menu/margherita-pizza.png'])],
-            ['category_id' => $cat['Pizza'], 'name' => 'Pepperoni Pizza', 'base_price' => 9.00, 'description' => 'Pepperoni & mozzarella.', 'images' => json_encode(['menu/pepperoni-pizza.jpg'])],
+            ['category_id' => $cat['Pizza'], 'name' => 'Margherita Pizza', 'base_price' => 8.00, 'description' => 'Classic cheese & tomato pizza.', 'images' => json_encode(['margherita-pizza.png'])],
+            ['category_id' => $cat['Pizza'], 'name' => 'Pepperoni Pizza', 'base_price' => 9.00, 'description' => 'Pepperoni & mozzarella.', 'images' => json_encode(['pepperoni-pizza.jpg'])],
 
             /* ---------- DRINKS ---------- */
-            ['category_id' => $cat['Drinks'], 'name' => 'Coca Cola', 'base_price' => 2.00, 'description' => 'Chilled Coke can (330 ml)', 'images' => json_encode(['menu/coke.jpeg'])],
-            ['category_id' => $cat['Drinks'], 'name' => 'Fresh Orange Juice', 'base_price' => 3.50, 'description' => 'Freshly squeezed oranges.', 'images' => json_encode(['menu/oj.png'])],
+            ['category_id' => $cat['Drinks'], 'name' => 'Coca Cola', 'base_price' => 2.00, 'description' => 'Chilled Coke can (330 ml)', 'images' => json_encode(['coke.jpeg'])],
+            ['category_id' => $cat['Drinks'], 'name' => 'Fresh Orange Juice', 'base_price' => 3.50, 'description' => 'Freshly squeezed oranges.', 'images' => json_encode(['oj.png'])],
 
             /* ---------- BURGERS ---------- */
-            ['category_id' => $cat['Burgers'], 'name' => 'Classic Beef Burger', 'base_price' => 7.00, 'description' => 'Juicy beef patty with lettuce.', 'images' => json_encode(['menu/classic-beef-burger.jpeg'])],
-            ['category_id' => $cat['Burgers'], 'name' => 'Veggie Burger', 'base_price' => 6.50, 'description' => 'Grilled veggie patty.', 'images' => json_encode(['menu/veggie-burger.jpg'])],
+            ['category_id' => $cat['Burgers'], 'name' => 'Classic Beef Burger', 'base_price' => 7.00, 'description' => 'Juicy beef patty with lettuce.', 'images' => json_encode(['classic-beef-burger.jpeg'])],
+            ['category_id' => $cat['Burgers'], 'name' => 'Veggie Burger', 'base_price' => 6.50, 'description' => 'Grilled veggie patty.', 'images' => json_encode(['veggie-burger.jpg'])],
 
             /* ---------- DESSERTS ---------- */
-            ['category_id' => $cat['Desserts'], 'name' => 'Chocolate Brownie', 'base_price' => 4.00, 'description' => 'Warm chocolate brownie.', 'images' => json_encode(['menu/brownie.jpg'])],
-            ['category_id' => $cat['Desserts'], 'name' => 'Ice Cream Sundae', 'base_price' => 5.00, 'description' => 'Vanilla ice-cream with toppings.', 'images' => json_encode(['menu/sundae.jpg'])],
+            ['category_id' => $cat['Desserts'], 'name' => 'Chocolate Brownie', 'base_price' => 4.00, 'description' => 'Warm chocolate brownie.', 'images' => json_encode(['brownie.jpg'])],
+            ['category_id' => $cat['Desserts'], 'name' => 'Ice Cream Sundae', 'base_price' => 5.00, 'description' => 'Vanilla ice-cream with toppings.', 'images' => json_encode(['sundae.jpg'])],
         ];
 
         $out = [];

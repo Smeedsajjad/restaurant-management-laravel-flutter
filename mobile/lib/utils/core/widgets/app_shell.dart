@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/home/views/home_view.dart';
+import 'package:mobile/features/product/views/product_list_view.dart';
 import 'package:mobile/utils/core/navigation/app_bottom_nav.dart';
 
 class AppShell extends StatefulWidget {
@@ -10,12 +11,12 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-    int _currentIndex = 0;
+  int _currentIndex = 0;
 
   final List<Widget> _pages = const [
     HomeView(),
     SizedBox(),
-    SizedBox(),
+    ProductListView(),
     SizedBox(),
     SizedBox(),
   ];
@@ -23,6 +24,7 @@ class _AppShellState extends State<AppShell> {
   void _onTabSelected(int index) {
     setState(() => _currentIndex = index);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

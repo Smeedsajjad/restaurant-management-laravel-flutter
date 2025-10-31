@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mobile/features/product/models/product_model.dart';
 import 'package:mobile/features/product/viewmodels/product_provider.dart';
+import 'package:mobile/features/product/models/product_model.dart';
 
 class ProductListView extends ConsumerWidget {
   const ProductListView({super.key});
@@ -10,50 +10,166 @@ class ProductListView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final productState = ref.watch(productViewModelProvider);
 
-    // Print product details when data is available
-    productState.whenData((products) {
-      for (final p in products) {
-        debugPrint('Product id=${p.id} images: ${p.images}');
-        if (p.images.isNotEmpty) {
-          debugPrint(' first image: ${p.images.first}');
-          debugPrint(
-            ' full url: ${Uri.encodeFull('http://backend.test/storage/${p.images.first}')}',
-          );
-        } else {
-          debugPrint(' no images for product id=${p.id}');
-        }
-      }
-    });
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          '🍽️ Menu',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.orange.shade400,
-        elevation: 0,
-      ),
       backgroundColor: Colors.grey.shade100,
-      body: productState.when(
-        data: (products) {
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.75,
+      body: SafeArea(
+        child: productState.when(
+          data: (paginated) {
+            final products = paginated.items;
+            return CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  automaticallyImplyLeading: false,
+                  backgroundColor: Colors.grey.shade100,
+                  elevation: 0,
+                  pinned: false,
+                  floating: true,
+                  snap: true,
+                  expandedHeight: 120,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Padding(
+                      padding: const EdgeInsets.only(
+                        top: 8,
+                        left: 8,
+                        right: 8,
+                        bottom: 8,
+                      ),
+                      child: _SearchHeader(),
+                    ),
+                  ),
+                ),
+
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverGrid(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) =>
+                          _ProductCard(product: products[index]),
+                      childCount: products.length,
+                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.75,
+                        ),
+                  ),
+                ),
+
+                // Pagination controls
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Center(
+                      child: Wrap(
+                        spacing: 8,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.chevron_left),
+                            onPressed: paginated.currentPage > 1
+                                ? () => ref
+                                      .read(productViewModelProvider.notifier)
+                                      .prevPage()
+                                : null,
+                          ),
+                         
+                          for (var i = 1; i <= paginated.lastPage; i++)
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                backgroundColor: i == paginated.currentPage
+                                    ? Colors.orange.shade100
+                                    : null,
+                                minimumSize: const Size(40, 36),
+                              ),
+                              onPressed: i == paginated.currentPage
+                                  ? null
+                                  : () => ref
+                                        .read(productViewModelProvider.notifier)
+                                        .goToPage(i),
+                              child: Text(
+                                '$i',
+                                style: TextStyle(
+                                  color: i == paginated.currentPage
+                                      ? Colors.orange.shade800
+                                      : null,
+                                ),
+                              ),
+                            ),
+                          IconButton(
+                            icon: const Icon(Icons.chevron_right),
+                            onPressed:
+                                paginated.currentPage < paginated.lastPage
+                                ? () => ref
+                                      .read(productViewModelProvider.notifier)
+                                      .nextPage()
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('❌ $e')),
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchHeader extends StatelessWidget {
+  const _SearchHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.orange.shade300),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.orange.shade600),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+              ),
             ),
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              final product = products[index];
-              return _ProductCard(product: product);
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('❌ $error')),
+          ),
+          const SizedBox(width: 12),
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined, size: 28),
+                color: Colors.black87,
+                onPressed: () {},
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  height: 10,
+                  width: 10,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -89,15 +205,16 @@ class _ProductCard extends StatelessWidget {
               child: imageUrl != null
                   ? Image.network(
                       imageUrl,
-                      height: 120,
+                      height: 620,
                       width: double.infinity,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         debugPrint('Error loading image: $error');
-                        return const Icon(
-                          Icons.image_not_supported,
-                          size: 60,
-                          color: Colors.grey,
+                        return Image.network(
+                          'https://imgs.search.brave.com/NYn-JEIE_LoKPQ3noBW4eyir59oRLDclkUmZg_n0JsI/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTM5/ODg1NDg0My9waG90/by9mcmllZC1jaGlj/a2VuLXNhbmR3aWNo/LmpwZz9zPTYxMng2/MTImdz0wJms9MjAm/Yz1iaW5QZldUVElR/MzN5NnVVU21MSkdi/X2t4M3ZvMmExN1RN/LWJRbHNDamlrPQ',
+                          height: 160,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
                         );
                       },
                     )
@@ -128,13 +245,6 @@ class _ProductCard extends StatelessWidget {
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    product.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                   ),
                   const SizedBox(height: 8),
                   Text(

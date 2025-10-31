@@ -17,7 +17,7 @@ class MenuItemsController extends Controller
     public function index(Request $request)
     {
 
-        return $this->success(MenuItemsResource::collection(MenuItem::all())->response()->getData(), 'Menu items fetched');
+        return $this->success(MenuItemsResource::collection(MenuItem::paginate(4))->response()->getData(), 'Menu items fetched');
     }
 
     /**
