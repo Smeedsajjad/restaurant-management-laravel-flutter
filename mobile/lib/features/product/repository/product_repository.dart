@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:mobile/features/product/models/product_details_model.dart';
 import 'package:mobile/features/product/models/paginated_products.dart';
 import 'package:http/http.dart' as http;
 
@@ -26,6 +27,29 @@ class ProductRepository {
       }
     } catch (e) {
       throw Exception('Error fetching products: $e');
+    }
+  }
+
+  Future<ProductDetailsModel> fetchProductDetails(int id) async {
+    try {
+      final uri = Uri.parse('$baseUrl/$id');
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        // handle responses where data might be wrapped
+        final payload = decoded['data'] is Map ? decoded['data'] : decoded;
+        // if the API returns { data: { data: {...} } } for single, normalize:
+        final item = (payload['data'] is Map)
+            ? payload['data'] as Map<String, dynamic>
+            : payload as Map<String, dynamic>;
+        return ProductDetailsModel.fromJson(item);
+      } else {
+        throw Exception(
+          'Failed to fetch product details: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error fetching product details: $e');
     }
   }
 }

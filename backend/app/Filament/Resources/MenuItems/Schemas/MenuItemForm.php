@@ -4,8 +4,8 @@ namespace App\Filament\Resources\MenuItems\Schemas;
 
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
@@ -42,7 +42,7 @@ class MenuItemForm
 
                 Section::make()
                     ->schema([
-                        RichEditor::make('description')
+                        Textarea::make('description')
                             ->extraAttributes([
                                 'style' => 'max-height: 300px; overflow-y: auto;',
                             ])

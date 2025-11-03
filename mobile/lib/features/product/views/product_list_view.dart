@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/product/viewmodels/product_provider.dart';
 import 'package:mobile/features/product/models/product_model.dart';
+import 'package:mobile/features/product/views/product_details_view.dart';
 
 class ProductListView extends ConsumerWidget {
   const ProductListView({super.key});
@@ -192,7 +193,9 @@ class _ProductCard extends StatelessWidget {
       elevation: 4,
       shadowColor: Colors.orange,
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=> ProductDetailView(product: product)));
+        },
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
