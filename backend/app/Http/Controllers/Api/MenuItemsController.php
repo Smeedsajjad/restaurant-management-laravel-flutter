@@ -17,7 +17,14 @@ class MenuItemsController extends Controller
     public function index(Request $request)
     {
 
-        return $this->success(MenuItemsResource::collection(MenuItem::paginate(4))->response()->getData(), 'Menu items fetched');
+        $perPage = (int) $request->query('per_page', 4);
+
+        $items = MenuItem::with('category')->paginate($perPage);
+
+        return $this->success(
+            MenuItemsResource::collection($items)->response()->getData(),
+            'Menu items fetched'
+        );
     }
 
     /**

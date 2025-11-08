@@ -1,19 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/product_model.dart';
 import 'package:mobile/utils/constants/app_colors.dart';
+import 'package:mobile/features/cart/viewmodels/cart_provider.dart';
+import 'package:mobile/features/product/models/product_details_model.dart';
+import 'package:mobile/features/product/repository/product_repository.dart';
+import 'package:mobile/features/cart/views/cart_page.dart';
 
-class ProductDetailView extends StatefulWidget {
+class ProductDetailView extends ConsumerStatefulWidget {
   final ProductModel product;
 
   const ProductDetailView({super.key, required this.product});
 
   @override
-  State<ProductDetailView> createState() => _ProductDetailViewState();
+  ConsumerState<ProductDetailView> createState() => _ProductDetailViewState();
 }
 
-class _ProductDetailViewState extends State<ProductDetailView> {
+class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
   int _currentImageIndex = 0;
   final PageController _pageController = PageController();
+  int _selectedQuantity = 1;
+
+  ProductDetailsModel? _details;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDetails();
+  }
 
   @override
   void dispose() {
@@ -21,99 +38,116 @@ class _ProductDetailViewState extends State<ProductDetailView> {
     super.dispose();
   }
 
+  Future<void> _loadDetails() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final repo = ProductRepository();
+      final details = await repo.fetchProductDetails(widget.product.id);
+      setState(() {
+        _details = details;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
+    }
+  }
+
+  Future<bool> _ensureLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null || token.isEmpty) {
+      final goToLogin = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Login required'),
+          content: const Text('Please login to add items to your cart.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Login'),
+            ),
+          ],
+        ),
+      );
+      if (goToLogin == true) {
+        Navigator.pushNamed(context, '/login');
+      }
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _addToCart() async {
+    final ok = await _ensureLoggedIn();
+    if (!ok) return;
+    try {
+      await ref
+          .read(cartProvider.notifier)
+          .addToCart(
+            menuItemId: widget.product.id,
+            quantity: _selectedQuantity,
+          );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Added to cart')));
+      // Optional: open cart
+      // Navigator.push(context, MaterialPageRoute(builder: (_) => const CartPage()));
+    } on Exception catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to add to cart: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: BackButton(color: Colors.black),
+        ),
+        body: Center(child: Text('Error: $_error')),
+      );
+    }
+
+    final product =
+        _details ??
+        ProductDetailsModel.fromJson({
+          'id': widget.product.id,
+          'category_id': widget.product.categoryId,
+          'category_name': widget.product.categoryName ?? 'Uncategorized',
+          'name': widget.product.name,
+          'description': widget.product.description,
+          'base_price': widget.product.basePrice,
+          'images': widget.product.images,
+          'is_available': widget.product.isAvailable,
+        });
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
           CustomScrollView(
             slivers: [
-              // Image Gallery Section
-              SliverToBoxAdapter(child: _buildImageGallery()),
-
-              // Product Details Section
-              SliverToBoxAdapter(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Category Badge
-                        _buildCategoryBadge(),
-                        const SizedBox(height: 16),
-
-                        // Product Name
-                        Text(
-                          widget.product.name,
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF2D3142),
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Price and Availability Row
-                        Row(
-                          children: [
-                            Text(
-                              '\$${widget.product.basePrice}',
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            const Spacer(),
-                            _buildAvailabilityChip(),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Divider
-                        Divider(color: Colors.grey.shade200, thickness: 1),
-                        const SizedBox(height: 24),
-
-                        // Description Header
-                        const Text(
-                          'Description',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF2D3142),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Description Text
-                        Text(
-                          widget.product.description,
-                          style: TextStyle(
-                            fontSize: 15,
-                            height: 1.6,
-                            color: Colors.grey.shade700,
-                          ),
-                        ),
-                        const SizedBox(height: 100),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              SliverToBoxAdapter(child: _buildImageGalleryWithDetails(product)),
+              SliverToBoxAdapter(child: _buildDetailsSection(product)),
             ],
           ),
-
-          // Back Button (Top Left)
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             left: 16,
@@ -122,28 +156,103 @@ class _ProductDetailViewState extends State<ProductDetailView> {
               onPressed: () => Navigator.pop(context),
             ),
           ),
-
-          // Favorite Button (Top Right)
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             right: 16,
             child: _buildIconButton(
               icon: Icons.favorite_border,
-              onPressed: () {
-                // Add to favorites logic
-              },
+              onPressed: () {},
             ),
           ),
-
-          // Add to Cart Button (Bottom)
-          Positioned(bottom: 0, left: 0, right: 0, child: _buildBottomBar()),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _buildBottomBar(product),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildImageGallery() {
-    final hasMultipleImages = widget.product.images.length > 1;
+  Widget _buildBottomBar(ProductDetailsModel product) {
+    final price = double.tryParse(product.basePrice) ?? 0.0;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            // Quantity selector
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove),
+                    onPressed: _selectedQuantity > 1
+                        ? () => setState(() => _selectedQuantity--)
+                        : null,
+                    splashRadius: 20,
+                  ),
+                  Text(
+                    '$_selectedQuantity',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () => setState(() => _selectedQuantity++),
+                    splashRadius: 20,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: _addToCart,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.add_shopping_cart_outlined),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Add (${_selectedQuantity}) • \$${(price * _selectedQuantity).toStringAsFixed(2)}',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.shopping_cart_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CartPage()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageGalleryWithDetails(ProductDetailsModel product) {
+    final hasMultipleImages = product.images.length > 1;
 
     return SizedBox(
       height: 400,
@@ -157,10 +266,10 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                 _currentImageIndex = index;
               });
             },
-            itemCount: widget.product.images.length,
+            itemCount: product.images.length,
             itemBuilder: (context, index) {
               final imageUrl =
-                  'http://backend.test/storage/${widget.product.images[index]}';
+                  'http://backend.test/storage/${product.images[index]}';
               return Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
@@ -215,7 +324,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
-                  widget.product.images.length,
+                  product.images.length,
                   (index) => _buildImageIndicator(index),
                 ),
               ),
@@ -390,94 +499,78 @@ class _ProductDetailViewState extends State<ProductDetailView> {
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildDetailsSection(ProductDetailsModel product) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
       ),
-      child: SafeArea(
-        top: false,
-        child: Row(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Quantity Selector
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.remove),
-                    onPressed: () {
-                      // Decrease quantity
-                    },
-                  ),
-                  const Text(
-                    '1',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      // Increase quantity
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
+            // Category Badge
+            _buildCategoryBadge(),
+            const SizedBox(height: 16),
 
-            // Add to Cart Button
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  elevation: 0,
-                ),
-                onPressed: widget.product.isAvailable
-                    ? () {
-                        // Add to cart logic
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${widget.product.name} added to cart!',
-                            ),
-                            backgroundColor: Colors.green,
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    : null,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.shopping_cart, size: 22),
-                    SizedBox(width: 8),
-                    Text(
-                      'Add to Cart',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+            // Product Name
+            Text(
+              widget.product.name,
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2D3142),
+                letterSpacing: -0.5,
               ),
             ),
+            const SizedBox(height: 16),
+
+            // Price and Availability Row
+            Row(
+              children: [
+                Text(
+                  '\$${widget.product.basePrice}',
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const Spacer(),
+                _buildAvailabilityChip(),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Divider
+            Divider(color: Colors.grey.shade200, thickness: 1),
+            const SizedBox(height: 24),
+
+            // Description Header
+            const Text(
+              'Description',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF2D3142),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Description Text
+            Text(
+              widget.product.description,
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.6,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 100),
           ],
         ),
       ),

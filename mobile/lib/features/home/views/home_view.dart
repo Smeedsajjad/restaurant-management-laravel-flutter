@@ -15,6 +15,8 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   String? userName;
+  bool _loggedIn = false; // added
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +29,7 @@ class _HomeViewState extends State<HomeView> {
     if (token == null) {
       setState(() {
         userName = 'Guest';
+        _loggedIn = false;
       });
       return;
     }
@@ -43,20 +46,33 @@ class _HomeViewState extends State<HomeView> {
         final data = jsonDecode(res.body);
         setState(() {
           userName = data['name'] ?? 'Guest';
+          _loggedIn = true;
         });
       } else {
         setState(() {
           userName = 'Guest';
+          _loggedIn = false;
         });
       }
     } catch (e) {
       setState(() {
         userName = 'Guest';
+        _loggedIn = false;
       });
     }
   }
 
   Future<void> _confirmLogout(BuildContext context) async {
+    // if user isn't logged in, inform them and optionally navigate to login
+    if (!_loggedIn) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('You are not logged in')));
+      // optional: navigate to login
+      // context.go('/login');
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -86,6 +102,10 @@ class _HomeViewState extends State<HomeView> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('token');
       debugPrint('🧹 Token removed. Logging out...');
+      setState(() {
+        userName = 'Guest';
+        _loggedIn = false;
+      });
 
       if (!mounted) return;
       await _showLogoutSuccessModal(context);
@@ -93,6 +113,10 @@ class _HomeViewState extends State<HomeView> {
       debugPrint('❌ Logout error: $e');
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('token');
+      setState(() {
+        userName = 'Guest';
+        _loggedIn = false;
+      });
       if (!mounted) return;
       await _showLogoutSuccessModal(context);
     }
@@ -198,21 +222,25 @@ class _HomeViewState extends State<HomeView> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                itemBuilder: (context) => [
-                  PopupMenuItem(value: 1, child: const Text('Profile')),
-                  PopupMenuItem(value: 2, child: const Text('Logout')),
-                ],
+                itemBuilder: (context) => _loggedIn
+                    ? [
+                        const PopupMenuItem(value: 1, child: Text('Profile')),
+                        const PopupMenuItem(value: 2, child: Text('Logout')),
+                      ]
+                    : [const PopupMenuItem(value: 3, child: Text('Login'))],
                 onSelected: (value) {
                   if (value == 1) {
                     context.go('/profile');
                   } else if (value == 2) {
                     _confirmLogout(context);
+                  } else if (value == 3) {
+                    context.go('/login');
                   }
                 },
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   radius: 20,
                   backgroundColor: AppColors.primary,
-                  child: Icon(Icons.person, color: Colors.white),
+                  child: const Icon(Icons.person, color: Colors.white),
                 ),
               ),
             ],
