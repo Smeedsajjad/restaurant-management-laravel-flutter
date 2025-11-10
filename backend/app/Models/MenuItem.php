@@ -27,4 +27,10 @@ class MenuItem extends Model
     {
         return $this->hasMany(Modifier::class);
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
 }

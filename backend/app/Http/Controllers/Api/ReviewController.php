@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ReviewResource;
+use App\Models\MenuItem;
 use App\Models\Review;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
@@ -43,5 +44,16 @@ class ReviewController extends Controller
         $review = Review::create($data);
 
         return $this->success(new ReviewResource($review), 'Review submitted successfully');
+    }
+
+
+    public function getReviews($menuItemId)
+    {
+        $menuItem = MenuItem::with('reviews')->findOrFail($menuItemId);
+
+        return $this->success(
+            ReviewResource::collection($menuItem->reviews),
+            'Menu item reviews'
+        );
     }
 }

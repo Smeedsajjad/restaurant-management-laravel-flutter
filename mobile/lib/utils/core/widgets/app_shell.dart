@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/cart/views/cart_page.dart';
 import 'package:mobile/features/home/views/home_view.dart';
 import 'package:mobile/features/product/views/product_list_view.dart';
+import 'package:mobile/features/reviews/views/review_view.dart';
 import 'package:mobile/utils/core/navigation/app_bottom_nav.dart';
 
 class AppShell extends StatefulWidget {
@@ -15,9 +17,9 @@ class _AppShellState extends State<AppShell> {
 
   final List<Widget> _pages = const [
     HomeView(),
-    SizedBox(),
+    CartPage(),
     ProductListView(),
-    SizedBox(),
+    ReviewView(),
     SizedBox(),
   ];
 

@@ -43,6 +43,8 @@ dependencies:
   go_router: ^16.2.4
   flutter_dotenv: ^6.0.0
   motion_tab_bar: ^2.0.4
+  flutter_rating_bar: ^4.0.1
+  readmore: ^3.0.0
 
 dev_dependencies:
   flutter_test:

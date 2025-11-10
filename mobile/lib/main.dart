@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/features/auth/view/login_screen.dart';
 import 'package:mobile/features/auth/view/register_screen.dart';
+import 'package:mobile/features/reviews/views/review_view.dart';
 import 'package:mobile/utils/constants/app_colors.dart';
 import 'package:mobile/utils/core/widgets/app_shell.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,7 +24,7 @@ class TaastyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final router = GoRouter(
-      initialLocation: '/home',
+      initialLocation: '/reviews',
       routes: [
         GoRoute(
           path: '/login',
@@ -40,27 +41,12 @@ class TaastyApp extends StatelessWidget {
           name: 'home',
           builder: (context, state) => const AppShell(),
         ),
+        GoRoute(
+          path: '/reviews',
+          name: 'reviews',
+          builder: (context, state) => const ReviewView(),
+        ),
       ],
-      
-      redirect: (context, state) async {
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString('token');
-        final loggedIn = token != null && token.isNotEmpty;
-
-        final isAuthRoute =
-            state.matchedLocation == '/login' ||
-            state.matchedLocation == '/register';
-
-        debugPrint(
-          '🔄 Router Redirect - Location: ${state.matchedLocation}, LoggedIn: $loggedIn',
-        );
-
-        if (loggedIn && isAuthRoute) {
-          return '/home';
-        }
-
-        return null;
-      },
     );
 
     return MaterialApp.router(

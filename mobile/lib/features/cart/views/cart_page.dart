@@ -32,7 +32,7 @@ class CartPage extends ConsumerWidget {
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: items.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final it = items[index];
                     return Card(
@@ -44,9 +44,7 @@ class CartPage extends ConsumerWidget {
                         child: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: AppColors.primary.withOpacity(
-                                0.12,
-                              ),
+                              backgroundColor: AppColors.primary,
                               child: Text(
                                 it.menuItem.name.isNotEmpty
                                     ? it.menuItem.name[0]
