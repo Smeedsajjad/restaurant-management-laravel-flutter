@@ -20,11 +20,9 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 /* ---- reviews (read only) ---- */
 Route::prefix('v1')->group(function () {
-    Route::get('reviews', [ReviewController::class, 'index']);
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('menu-items', MenuItemsController::class);
     Route::get('menu-items/{menuItem}/reviews', [ReviewController::class, 'getReviews']);
-
 });
 
 /* ------------------------------------------------------------------

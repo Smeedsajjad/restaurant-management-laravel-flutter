@@ -24,7 +24,7 @@ class TaastyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final router = GoRouter(
-      initialLocation: '/reviews',
+      initialLocation: '/home',
       routes: [
         GoRoute(
           path: '/login',
@@ -42,9 +42,12 @@ class TaastyApp extends StatelessWidget {
           builder: (context, state) => const AppShell(),
         ),
         GoRoute(
-          path: '/reviews',
+          path: '/reviews/:menuItemId',
           name: 'reviews',
-          builder: (context, state) => const ReviewView(),
+          builder: (context, state) {
+            final menuItemId = int.parse(state.pathParameters['menuItemId']!);
+            return ReviewView(productId: menuItemId);
+          },
         ),
       ],
     );

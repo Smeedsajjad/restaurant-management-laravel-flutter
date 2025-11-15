@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/product_model.dart';
 import 'package:mobile/utils/constants/app_colors.dart';
@@ -569,6 +570,36 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 height: 1.6,
                 color: Colors.grey.shade700,
               ),
+            ),
+            const SizedBox(height: 12),
+            // Divider
+            Divider(color: Colors.grey.shade200, thickness: 1),
+            const SizedBox(height: 24),
+
+            // Review Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Reviews',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2D3142),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    context.pushNamed(
+                      'reviews',
+                      pathParameters: {
+                        'menuItemId': widget.product.id.toString(),
+                      },
+                    );
+                  },
+                  icon: Icon(Icons.arrow_forward, fontWeight: FontWeight.w600),
+                ),
+              ],
             ),
             const SizedBox(height: 100),
           ],

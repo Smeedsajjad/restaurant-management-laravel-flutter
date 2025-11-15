@@ -39,7 +39,7 @@ class ReviewController extends Controller
 
         $data = $validated;
         $data['user_id'] = Auth::id();
-        $data['is_approved'] = false;
+        // $data['is_approved'] = false;
 
         $review = Review::create($data);
 

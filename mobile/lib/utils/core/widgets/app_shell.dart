@@ -19,7 +19,7 @@ class _AppShellState extends State<AppShell> {
     HomeView(),
     CartPage(),
     ProductListView(),
-    ReviewView(),
+    SizedBox(),
     SizedBox(),
   ];
 

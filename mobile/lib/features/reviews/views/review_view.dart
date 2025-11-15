@@ -1,14 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/utils/constants/app_colors.dart';
-import 'package:mobile/utils/constants/app_sizes.dart';
 import 'package:readmore/readmore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ReviewView extends StatelessWidget {
-  const ReviewView({super.key});
+import '../data/review_model.dart';
+import '../view_model/review_notifier.dart';
+
+class ReviewView extends ConsumerStatefulWidget {
+  final int productId;
+
+  const ReviewView({super.key, required this.productId});
+
+  @override
+  ConsumerState<ReviewView> createState() => _ReviewViewState();
+}
+
+class _ReviewViewState extends ConsumerState<ReviewView> {
+  double selectedRating = 0;
+  final TextEditingController reviewController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(reviewNotifierProvider.notifier).loadReviews(widget.productId);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final reviewsState = ref.watch(reviewNotifierProvider);
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -16,168 +40,243 @@ class ReviewView extends StatelessWidget {
             'Reviews & Ratings',
             style: TextStyle(fontWeight: FontWeight.w800),
           ),
-          leading: BackButton(color: Colors.black),
+          leading: const BackButton(color: Colors.black),
         ),
+
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (context) => Container(
-                padding: const EdgeInsets.all(24),
-                width: double.infinity,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Rate Your Experience',
-                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        RatingBar(
-                          initialRating: 0,
-                          minRating: 1,
-                          direction: Axis.horizontal,
-                          allowHalfRating: true,
-                          glowColor: AppColors.grey400,
-                          itemCount: 5,
-                          itemSize: 40,
-                          ratingWidget: RatingWidget(
-                            full: const Icon(
-                              Icons.star,
-                              color: AppColors.primary,
-                            ),
-                            half: const Icon(
-                              Icons.star_half,
-                              color: AppColors.primary,
-                            ),
-                            empty: const Icon(
-                              Icons.star_border,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          onRatingUpdate: (rating) {},
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      "Feedback is important to us. Please let us know about your experience.",
-                      style: TextStyle(color: AppColors.textPrimary),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      maxLines: 3,
-                      autocorrect: true,
-                      decoration: InputDecoration(
-                        hintText: 'Write your review here...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 60),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 62,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                        ),
-                        child: Text(
-                          "Submit",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
           icon: const Icon(Icons.rate_review),
           label: const Text('Add Review'),
+          onPressed: () {
+            showAddReviewSheet(context);
+          },
         ),
-        body: Container(
-          padding: EdgeInsets.all(16),
-          child: Column(
+
+        body: reviewsState.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+
+          error: (err, _) => Center(
+            child: Text(
+              "Something went wrong $err",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+
+          data: (reviews) => buildReviewBody(context, reviews),
+        ),
+      ),
+    );
+  }
+
+  Widget buildReviewBody(
+    BuildContext context,
+    List<ProductReviewModel> reviews,
+  ) {
+    final avgRating = reviews.isEmpty
+        ? 0.0
+        : reviews.map((e) => e.rating).reduce((a, b) => a + b) / reviews.length;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ratings and reviews are verified.',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
+
+          const SizedBox(height: 20),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Ratings and reviews are verified and are from people who use the same type of device that you use.',
-                style: TextStyle(color: AppColors.textPrimary),
+                avgRating.toStringAsFixed(1),
+                style: Theme.of(context).textTheme.displayLarge,
               ),
+              const SizedBox(width: 16),
 
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: Text(
-                        '4.5',
-                        style: Theme.of(context).textTheme.displayLarge,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 7,
-                      child: Column(
-                        children: [
-                          RatingProgressIndicator(text: 5, value: 0.7),
-                          RatingProgressIndicator(text: 4, value: 0.5),
-                          RatingProgressIndicator(text: 3, value: 0.4),
-                          RatingProgressIndicator(text: 2, value: 0.3),
-                          RatingProgressIndicator(text: 1, value: 0.1),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
+              Expanded(
                 child: Column(
                   children: [
-                    RatingBarIndicator(
-                      rating: 4.5,
-                      itemSize: 20,
-                      itemBuilder: (_, _) =>
-                          const Icon(Icons.star, color: AppColors.primary),
-                    ),
-                    Text(
-                      '113,2',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
+                    ratingRow(5, reviews),
+                    ratingRow(4, reviews),
+                    ratingRow(3, reviews),
+                    ratingRow(2, reviews),
+                    ratingRow(1, reviews),
                   ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: UserReviewCards(
-                  userName: 'Jhon Doe',
-                  rating: 4.5,
-                  reviewDate: '10 Nov 2025',
-                  reviewText:
-                      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
                 ),
               ),
             ],
           ),
+
+          const SizedBox(height: 16),
+
+          RatingBarIndicator(
+            rating: avgRating,
+            itemSize: 22,
+            itemBuilder: (_, _) =>
+                const Icon(Icons.star, color: AppColors.primary),
+          ),
+
+          Text(
+            "${reviews.length} reviews",
+            style: const TextStyle(color: AppColors.textPrimary),
+          ),
+
+          const SizedBox(height: 20),
+
+          ...reviews.map(
+            (e) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: UserReviewCards(
+                userName: e.user.name,
+                rating: e.rating.toDouble(),
+                reviewDate: e.createdAt,
+                reviewText: e.comment,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget ratingRow(int star, List<ProductReviewModel> reviews) {
+    final total = reviews.length;
+    final count = reviews.where((e) => e.rating == star).length;
+
+    final value = total == 0 ? 0.0 : count / total;
+
+    return RatingProgressIndicator(text: star, value: value);
+  }
+
+  // --------------------------------------------------------------------------
+  // BOTTOM SHEET — Add Review
+  // --------------------------------------------------------------------------
+  void showAddReviewSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Rate Your Experience',
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                RatingBar(
+                  initialRating: 0,
+                  minRating: 1,
+                  allowHalfRating: false,
+                  direction: Axis.horizontal,
+                  itemCount: 5,
+                  itemSize: 40,
+                  ratingWidget: RatingWidget(
+                    full: const Icon(Icons.star, color: AppColors.primary),
+                    half: const Icon(Icons.star_half, color: AppColors.primary),
+                    empty: const Icon(
+                      Icons.star_border,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  onRatingUpdate: (rating) {
+                    setState(() {
+                      selectedRating = rating;
+                    });
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: reviewController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: 'Write your review here...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      try {
+                        final prefs = await SharedPreferences.getInstance();
+                        final token = prefs.getString('token');
+
+                        if (token == null) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Login Required'),
+                              content: const Text(
+                                'Please log in to add a review.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                          return;
+                        }
+
+                        await ref
+                            .read(reviewNotifierProvider.notifier)
+                            .submitReview(
+                              menuItemId: widget.productId,
+                              rating: selectedRating,
+                              comment: reviewController.text,
+                            );
+                        Navigator.pop(context);
+                      } catch (e) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Error'),
+                            content: Text(e.toString()),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                    ),
+                    child: const Text(
+                      "Submit Review",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -226,21 +325,24 @@ class UserReviewCards extends StatelessWidget {
           ],
         ),
         SizedBox(height: 8),
-        ReadMoreText(
-          reviewText,
-          trimLines: 2,
-          trimMode: TrimMode.Line,
-          trimExpandedText: 'show less',
-          trimCollapsedText: 'show more',
-          moreStyle: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-          lessStyle: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
+        Align(
+          alignment: AlignmentGeometry.centerLeft,
+          child: ReadMoreText(
+            reviewText,
+            trimLines: 2,
+            trimMode: TrimMode.Line,
+            trimExpandedText: 'show less',
+            trimCollapsedText: 'show more',
+            moreStyle: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+            lessStyle: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
           ),
         ),
       ],
