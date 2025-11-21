@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\MenuItemsController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\UserAuthController;
 use App\Http\Resources\CartResource;
 use Illuminate\Http\Request;
@@ -18,8 +19,9 @@ Route::post('login', [UserAuthController::class, 'login']);
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
-/* ---- reviews (read only) ---- */
+/* ---- ---- */
 Route::prefix('v1')->group(function () {
+    Route::get('search', [SearchController::class, 'index']);
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('menu-items', MenuItemsController::class);
     Route::get('menu-items/{menuItem}/reviews', [ReviewController::class, 'getReviews']);

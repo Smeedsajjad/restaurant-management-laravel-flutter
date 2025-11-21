@@ -201,7 +201,17 @@ class _HomeViewState extends State<HomeView> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(50),
                 ),
-                child: const Icon(Icons.search, color: Colors.black87),
+                child: GestureDetector(
+                  onTap: () => context.push('/search'),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: const Icon(Icons.search, color: Colors.black87),
+                  ),
+                ),
               ),
               Container(
                 padding: const EdgeInsets.all(8),
